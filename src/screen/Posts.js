@@ -31,6 +31,8 @@ const Posts = () => {
     const [imageData, setImageData] = useState('');
     const [isMenuVisible, setMenuVisible] = React.useState(false);
     const [isChecked, setIsChecked] = useState(false);
+    
+
 
     const handleGoBack = () => {
         navigation.goBack();
