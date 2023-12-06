@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { NativeModules, Platform, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Modal } from 'react-native';
 import { View, FlatList, Button, Image, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,6 +13,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import { jwtDecode } from "jwt-decode";
+import * as Updates from 'expo-updates';
+
 
 const Posts = () => {
     const navigation = useNavigation();
@@ -40,6 +42,14 @@ const Posts = () => {
 
     const handleGoBack = () => {
         navigation.goBack();
+        // setModalVisible(false);
+        // navigation.navigate('Posts');
+        // Updates.fetchUpdateAsync();
+    };
+
+    const reload = () => {
+        Updates.reloadAsync();
+        navigation.navigate('Posts');
     };
 
 
@@ -48,43 +58,68 @@ const Posts = () => {
     };
 
     useEffect(() => {
-        // Verificar si el usuario está autenticado al cargar el componente
         const checkAuthentication = async () => {
-              const accessToken = await AsyncStorage.getItem('accessToken');
-        
-              if (accessToken) {
-                setToken(true);
-              } else {
-                setToken(false);
-              }
+          try {
+            const accessToken = await AsyncStorage.getItem('accessToken');
+      
+            if (accessToken) {
+              setToken(true);
+            } else {
+              setToken(false);
+            }
+          } catch (error) {
+            console.error('Error al obtener el token:', error);
+            // Manejar el error de manera apropiada, por ejemplo, redirigir a la página de inicio de sesión
+          }
         };
-        
+      
         checkAuthentication();
     }, []);
 
-    useEffect(async () => {
-        const getRole = async () => {
-                const accessToken = await AsyncStorage.getItem('accessToken');
-                // console.log(accessToken);
-                // console.log(jwtDecode(accessToken).userStore.name);
-                if(jwtDecode(accessToken).userStore.role == "admin"){
-                    setRole(true);
-                }else{
-                    setRole(false);
-                }
+    useEffect(() => {
+        const getTokenName = async () => {
+          try {
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            // console.log(accessToken);
+      
+            if (accessToken) {
+              const decodedToken = jwtDecode(accessToken);
+            //   console.log(decodedToken.userStore.name);
+      
+              if (decodedToken.userStore.role === "admin") {
+                setRole(true);
+              } else {
+                setRole(false);
+              }
+            } else {
+              console.log("No hay accessToken")
+            }
+          } catch (error) {
+            console.error('Error al obtener o decodificar el token:', error);
+          }
         };
 
-        getRole();
-    }, []);
+        getTokenName();
+    });
 
-    useEffect(async () => {
+    useEffect(() => {
         const getUserId = async () => {
-                const accessToken = await AsyncStorage.getItem('accessToken');
-                console.log(accessToken);
-
-                setUsId(jwtDecode(accessToken).userStore._id);
+          try {
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            // console.log(accessToken);
+      
+            if (accessToken) {
+              const decodedToken = jwtDecode(accessToken);
+              setUsId(decodedToken.userStore._id);
+            } else {
+              console.log("No hay accessToken")
+            }
+          } catch (error) {
+            console.error('Error al obtener o decodificar el token:', error);
+            // Manejar el error de manera apropiada
+          }
         };
-
+      
         getUserId();
     }, []);
 
@@ -406,8 +441,6 @@ const Posts = () => {
         }
     }
 
-
-
     return (
         <View style={{ flex: 1 }}>
             {/* <Video source={{ uri: "https://vjs.zencdn.net/v/oceans.mp4" }}/> */}
@@ -504,6 +537,12 @@ const Posts = () => {
                     {/* </TouchableOpacity> */}
                 </View>
             )}/>
+
+                {/* <View>
+                    <TouchableOpacity onPress={reload} style={{shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', fontWeight: 'bold'}}>
+                        <Text style={{ color: '#FFF',fontWeight: 'bold'}}>Reload</Text>
+                    </TouchableOpacity>
+                </View> */}
 
             {role && (
                 <View>

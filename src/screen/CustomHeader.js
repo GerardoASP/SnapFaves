@@ -43,33 +43,53 @@ const CustomHeader = () => {
     navigation.navigate('VerifyComponent'); // Redirige al usuario a la pantalla de inicio de sesión
   };
 
+  const handlePosts = async () => {
+    // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
+    navigation.navigate('Posts'); // Redirige al usuario a la pantalla de inicio de sesión
+  };
+
   useEffect(() => {
-    // Verificar si el usuario está autenticado al cargar el componente
     const checkAuthentication = async () => {
-          const accessToken = await AsyncStorage.getItem('accessToken');
-    
-          if (accessToken) {
-            setToken(true);
-          } else {
-            setToken(false);
-          }
+      try {
+        const accessToken = await AsyncStorage.getItem('accessToken');
+  
+        if (accessToken) {
+          setToken(true);
+        } else {
+          setToken(false);
+        }
+      } catch (error) {
+        console.error('Error al obtener el token:', error);
+        // Manejar el error de manera apropiada, por ejemplo, redirigir a la página de inicio de sesión
+      }
     };
-    
+  
     checkAuthentication();
   }, []);
 
-  useEffect(async () => {
+  useEffect(() => {
     const getTokenName = async () => {
-      const accessToken = await AsyncStorage.getItem('accessToken');
-      console.log(accessToken);
-      console.log(jwtDecode(accessToken).userStore.name);
-      if(jwtDecode(accessToken).userStore.role == "admin"){
-          setRole(true);
-      }else{
-          setRole(false);
+      try {
+        const accessToken = await AsyncStorage.getItem('accessToken');
+        // console.log(accessToken);
+  
+        if (accessToken) {
+          const decodedToken = jwtDecode(accessToken);
+          console.log(decodedToken.userStore.name);
+  
+          if (decodedToken.userStore.role === "admin") {
+            setRole(true);
+          } else {
+            setRole(false);
+          }
+        } else {
+          console.log("No hay accessToken")
+        }
+      } catch (error) {
+        console.error('Error al obtener o decodificar el token:', error);
       }
     };
-
+  
     getTokenName();
   }, []);
 
@@ -119,6 +139,8 @@ const CustomHeader = () => {
 
 
 
+
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 100, backgroundColor: 'lightgray', justifyContent: "space-between" , padding: 20}}>
         <View style={{ flexDirection: 'row'}}>
@@ -132,6 +154,7 @@ const CustomHeader = () => {
                 <AntDesign name="menufold" size={30} color="black" />
             </TouchableOpacity>
         </View>
+        
         <Modal isVisible={isMenuVisible}>
             <View style={{backgroundColor: 'white', borderRadius: 10, padding: 10}}>
                 <Text style={{fontSize: 24, fontWeight: 'bold', marginBottom: 20}}>Menú</Text>
@@ -158,6 +181,7 @@ const CustomHeader = () => {
                     <Text style={{ fontSize: 18, marginBottom: 10 }}>Verificar usuarios</Text>
                   </TouchableOpacity>
                 )}
+
 
                 {/* <TouchableOpacity onPress={handleLogout}>
                     <Text style={{fontSize: 18, marginBottom: 10}}>Cerrar sesión</Text>

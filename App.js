@@ -35,8 +35,8 @@ export default function App() {
         <Stack.Screen name = "WelcomeSlide" component={WelcomeSlide} options={{ headerShown: false }}/>
         <Stack.Screen name = "Posts" component={Posts} options={{ header: () => <CustomHeader/> }}/>
         <Stack.Screen name = "Videos" component={Videos}/>
-        <Stack.Screen name = "RegisterForm" component={RegisterForm} options={{ header: () => <CustomHeader/> }}/>
-        <Stack.Screen name = "LoginForm" component={LoginForm} options={{ header: () => <CustomHeader/> }}/>
+        <Stack.Screen name = "RegisterForm" component={RegisterForm} options={{ headerShown: false }}/>
+        <Stack.Screen name = "LoginForm" component={LoginForm} options={{ headerShown: false }}/>
         <Stack.Screen name = "CustomeHeader" component={CustomHeader}/>
         <Stack.Screen name = "PrivacyPolicies" component={PrivacyPolicies}/>
         <Stack.Screen name = "WelcomeToSnapFaves" component={WelcomeToSnapFaves} options={{ headerShown: false }}/>
