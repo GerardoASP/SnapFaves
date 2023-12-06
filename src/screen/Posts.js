@@ -67,6 +67,8 @@ const Posts = () => {
             } else {
               setToken(false);
             }
+
+
           } catch (error) {
             console.error('Error al obtener el token:', error);
             // Manejar el error de manera apropiada, por ejemplo, redirigir a la página de inicio de sesión
@@ -163,8 +165,8 @@ const Posts = () => {
         subtitle: "",
         description: "",
         avatar: "",
-        userId: UsId,
-        active: isChecked
+        active: isChecked,
+        author: UsId
     });
 
 
@@ -380,7 +382,7 @@ const Posts = () => {
             console.log(isChecked);
             newPost.active = isChecked;
             console.log(newPost);
-            newPost.userId = UsId;
+            newPost.author = UsId;
             
             // newPost.avatar = images; // PASA LAS URIS TEMPORALES DE LAS FOTOS EN EL CELULAR (NO ES LO IDEAL)
             
@@ -501,35 +503,35 @@ const Posts = () => {
                                 </View> */}
 
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    {token && role && (
-                                    <View style={{flexDirection: 'row'}}>
-                                        <TouchableOpacity
-                                            onPress={() => handleDeletePost(item._id)}
-                                            style={{ borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#ff4545', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                            <Icon name="trash" size={20} color="black"/>
-                                        </TouchableOpacity>
-                                        <Text>  </Text>
-                                        {!item.active && (
+                                    {token && role && UsId === item.author && (
+                                        <View style={{flexDirection: 'row'}}>
                                             <TouchableOpacity
-                                                onPress={() => handleUpdatePost(item._id)}
-                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                                <Icon name="check" size={20} color="black"/>
+                                                onPress={() => handleDeletePost(item._id)}
+                                                style={{ borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#ff4545', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                <Icon name="trash" size={20} color="black"/>
                                             </TouchableOpacity>
-                                        )}
-                                    </View>
+                                            <Text>  </Text>
+                                            {!item.active && (
+                                                <TouchableOpacity
+                                                    onPress={() => handleUpdatePost(item._id)}
+                                                    style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                    <Icon name="check" size={20} color="black"/>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
                                     )}
                                     {token && (
-                                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                        <TouchableOpacity
-                                            style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                            <Icon name="thumbs-up" size={20} color="black"/>
-                                        </TouchableOpacity>
-                                        <Text>  </Text>
-                                        <TouchableOpacity
-                                            style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#F4B400', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                            <Icon name="star" size={20} color="black"/>
-                                        </TouchableOpacity>
-                                    </View>
+                                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                            <TouchableOpacity
+                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                <Icon name="thumbs-up" size={20} color="black"/>
+                                            </TouchableOpacity>
+                                            <Text>  </Text>
+                                            <TouchableOpacity
+                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#F4B400', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                <Icon name="star" size={20} color="black"/>
+                                            </TouchableOpacity>
+                                        </View>
                                     )}
                                 </View>
                             </Card.Content>
