@@ -142,8 +142,8 @@ const LoginForm = () => {
       await AsyncStorage.setItem("accessToken", accessToken);
       await AsyncStorage.setItem("refreshToken", refreshToken);
   
-      navigation.navigate("Posts");
       Alert.alert("Inicio de sesión exitoso", "¡Bienvenido! Por favor, dale OK para continuar.");
+      navigation.navigate("WelcomeSlide");
     } catch (error) {
       console.error("Error de inicio de sesión:", error);
   

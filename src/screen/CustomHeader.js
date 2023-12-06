@@ -4,14 +4,16 @@ import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 // import { decode as atob } from 'base-64';
 
 const CustomHeader = () => {
   const navigation = useNavigation();
   const [isMenuVisible, setMenuVisible] = useState(false);
-  const [userRole, setUserRole] = useState(null);
+  // const [userRole, setUserRole] = useState(null);
   const [token, setToken] = useState(false);
+  const [role, setRole] = useState(false);
+  const [UsId, setUsId] = useState('');
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -36,16 +38,39 @@ const CustomHeader = () => {
     navigation.navigate('WelcomeSlide'); // Redirige al usuario a la pantalla de inicio de sesión
   };
 
+  const handleVerify = async () => {
+    // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
+    navigation.navigate('VerifyComponent'); // Redirige al usuario a la pantalla de inicio de sesión
+  };
+
   useEffect(() => {
     // Verificar si el usuario está autenticado al cargar el componente
     const checkAuthentication = async () => {
+          const accessToken = await AsyncStorage.getItem('accessToken');
+    
+          if (accessToken) {
+            setToken(true);
+          } else {
+            setToken(false);
+          }
+    };
+    
+    checkAuthentication();
+  }, []);
+
+  useEffect(async () => {
+    const getTokenName = async () => {
       const accessToken = await AsyncStorage.getItem('accessToken');
-      if (accessToken) {
-        setToken(true);
+      console.log(accessToken);
+      console.log(jwtDecode(accessToken).userStore.name);
+      if(jwtDecode(accessToken).userStore.role == "admin"){
+          setRole(true);
+      }else{
+          setRole(false);
       }
     };
 
-    checkAuthentication();
+    getTokenName();
   }, []);
 
   // const accessToken = AsyncStorage.getItem('accessToken');
@@ -125,6 +150,12 @@ const CustomHeader = () => {
                 {token && (
                   <TouchableOpacity onPress={handleLogout}>
                     <Text style={{ fontSize: 18, marginBottom: 10 }}>Cerrar sesión</Text>
+                  </TouchableOpacity>
+                )}
+                
+                {token && role && (
+                  <TouchableOpacity onPress={handleVerify}>
+                    <Text style={{ fontSize: 18, marginBottom: 10 }}>Verificar usuarios</Text>
                   </TouchableOpacity>
                 )}
 

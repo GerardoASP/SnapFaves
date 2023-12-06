@@ -9,9 +9,22 @@ import RegisterForm from './src/screen/RegisterForm';
 import LoginForm from './src/screen/LoginForm';
 import CustomHeader from './src/screen/CustomHeader';
 import PrivacyPolicies from './src/screen/PrivacyPolicies';
+import WelcomeToSnapFaves from './src/screen/WelcomeToSnapFaves';
 // import 'expo-dev-client'
 
 const Stack = createStackNavigator();
+
+
+import { decode, encode } from 'base-64';
+import VerifyComponent from './src/screen/VerifyComponent';
+
+if (!global.btoa) {
+  global.btoa = encode;
+}
+
+if (!global.atob) {
+  global.atob = decode;
+}
 
 
 
@@ -26,6 +39,8 @@ export default function App() {
         <Stack.Screen name = "LoginForm" component={LoginForm} options={{ header: () => <CustomHeader/> }}/>
         <Stack.Screen name = "CustomeHeader" component={CustomHeader}/>
         <Stack.Screen name = "PrivacyPolicies" component={PrivacyPolicies}/>
+        <Stack.Screen name = "WelcomeToSnapFaves" component={WelcomeToSnapFaves} options={{ headerShown: false }}/>
+        <Stack.Screen name = "VerifyComponent" component={VerifyComponent} options={{ header: () => <CustomHeader/> }}/>
       </Stack.Navigator>
     </NavigationContainer>
     // <View style={styles.container}>

@@ -12,7 +12,7 @@ import axios from 'axios'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
-
+import { jwtDecode } from "jwt-decode";
 
 const Posts = () => {
     const navigation = useNavigation();
@@ -25,12 +25,16 @@ const Posts = () => {
     const [isReady, setIsReady] = useState(false)
     const video = useRef(null);
     const [status, setStatus] = useState({});
+    const [token, setToken] = useState(false);
+    const [role, setRole] = useState(false);
 
     // const [isState, setIsState] = useState(false);
 
     const [imageData, setImageData] = useState('');
+    const [UsId, setUsId] = useState('');
     const [isMenuVisible, setMenuVisible] = React.useState(false);
     const [isChecked, setIsChecked] = useState(false);
+    const [name, setName] = useState(undefined);
     
 
 
@@ -38,13 +42,59 @@ const Posts = () => {
         navigation.goBack();
     };
 
-    const handleMenuClick = () => {
-        setMenuVisible(!isMenuVisible);
-    };
 
     const handleCheckboxChange = () => {
         setIsChecked(!isChecked);
     };
+
+    useEffect(() => {
+        // Verificar si el usuario está autenticado al cargar el componente
+        const checkAuthentication = async () => {
+              const accessToken = await AsyncStorage.getItem('accessToken');
+        
+              if (accessToken) {
+                setToken(true);
+              } else {
+                setToken(false);
+              }
+        };
+        
+        checkAuthentication();
+    }, []);
+
+    useEffect(async () => {
+        const getRole = async () => {
+                const accessToken = await AsyncStorage.getItem('accessToken');
+                // console.log(accessToken);
+                // console.log(jwtDecode(accessToken).userStore.name);
+                if(jwtDecode(accessToken).userStore.role == "admin"){
+                    setRole(true);
+                }else{
+                    setRole(false);
+                }
+        };
+
+        getRole();
+    }, []);
+
+    useEffect(async () => {
+        const getUserId = async () => {
+                const accessToken = await AsyncStorage.getItem('accessToken');
+                console.log(accessToken);
+
+                setUsId(jwtDecode(accessToken).userStore._id);
+        };
+
+        getUserId();
+    }, []);
+
+    // const decodification = async () => {
+    //     const accessToken = await AsyncStorage.getItem('accessToken');
+
+    //     var decoded = jwtDecode(accessToken);
+    //     console.log(decoded);
+    // };
+    
 
     const handleLogout = async () => {
         // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
@@ -78,6 +128,7 @@ const Posts = () => {
         subtitle: "",
         description: "",
         avatar: "",
+        userId: UsId,
         active: isChecked
     });
 
@@ -294,6 +345,7 @@ const Posts = () => {
             console.log(isChecked);
             newPost.active = isChecked;
             console.log(newPost);
+            newPost.userId = UsId;
             
             // newPost.avatar = images; // PASA LAS URIS TEMPORALES DE LAS FOTOS EN EL CELULAR (NO ES LO IDEAL)
             
@@ -324,9 +376,12 @@ const Posts = () => {
 
     const handleDeletePost = (postId) =>{
         console.log("postId", postId);
+        console.log("userId", UsId);
         const updatedPosts = postsList.filter((post) => post._id !== postId);
         setPostsLists(updatedPosts);
-        axios.delete(`http://192.168.0.19:3000/api/v1/posts/${postId}`)
+        axios.delete(`http://192.168.0.19:3000/api/v1/posts/${postId}`, {
+            data: { userId: UsId } // Enviar el userId en el cuerpo de la solicitud
+        })
         .then((response) => {
             console.log('Post deleted', response.data)
         })
@@ -336,12 +391,28 @@ const Posts = () => {
     }
 
 
+    const handleUpdatePost = async (postId) => {
+        try {
+            const datos = {
+                active: true, // O el valor que desees asignar a 'active'
+            };
+        
+            const response = await axios.put(`http://192.168.0.19:3000/api/v1/posts/${postId}/edit`, datos);
+
+            console.log('Respuesta de la solicitud PUT:', response.data);
+        } catch (error) {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al realizar la solicitud PUT:', error);
+        }
+    }
+
+
 
     return (
         <View style={{ flex: 1 }}>
             {/* <Video source={{ uri: "https://vjs.zencdn.net/v/oceans.mp4" }}/> */}
             <FlatList 
-            data={postsList} 
+            data={postsList/* .filter(item => item.active) */} 
             keyExtractor={(item) => item._id}
             renderItem = {({item})=>(
                 <View style={{flex: 1, justifyContent: "center", alignItems: "center", alignContent: "center", margin: 10}}>
@@ -397,18 +468,24 @@ const Posts = () => {
                                 </View> */}
 
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    {token && role && (
                                     <View style={{flexDirection: 'row'}}>
                                         <TouchableOpacity
                                             onPress={() => handleDeletePost(item._id)}
                                             style={{ borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#ff4545', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
                                             <Icon name="trash" size={20} color="black"/>
                                         </TouchableOpacity>
-                                        {/* <Text>  </Text>
-                                        <TouchableOpacity
-                                            style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                            <Icon name="info-circle" size={20} color="black"/>
-                                        </TouchableOpacity> */}
+                                        <Text>  </Text>
+                                        {!item.active && (
+                                            <TouchableOpacity
+                                                onPress={() => handleUpdatePost(item._id)}
+                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                <Icon name="check" size={20} color="black"/>
+                                            </TouchableOpacity>
+                                        )}
                                     </View>
+                                    )}
+                                    {token && (
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                                         <TouchableOpacity
                                             style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
@@ -420,6 +497,7 @@ const Posts = () => {
                                             <Icon name="star" size={20} color="black"/>
                                         </TouchableOpacity>
                                     </View>
+                                    )}
                                 </View>
                             </Card.Content>
                         </Card>
@@ -427,14 +505,15 @@ const Posts = () => {
                 </View>
             )}/>
 
-            {/* <Button title="Nuevo Post" onPress={() => setModalVisible(true)}/> */}
-            <View>
-                <TouchableOpacity
-                    onPress={() => setModalVisible(true)}
-                    style={{shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center'}}>
-                    <Text style={{color: '#FFF', fontWeight: 'bold'}}>NUEVO POST</Text>
-                </TouchableOpacity>
-            </View>
+            {role && (
+                <View>
+                    <TouchableOpacity
+                        onPress={() => setModalVisible(true)}
+                        style={{shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center'}}>
+                        <Text style={{color: '#FFF', fontWeight: 'bold'}}>NUEVO POST</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
             <Modal 
                 visible={modalVisible} 
                 onRequestClose={() => setModalVisible(false)}
@@ -549,16 +628,17 @@ const Posts = () => {
                                 }}
                             /> */}
 
-                            <View>
-                                <TouchableOpacity 
-                                    onPress={() => {
-                                        handleCreatePost();
-                                        setModalVisible(false);
-                                    }} 
-                                    style={{shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center'}}>
-                                    <Text style={{color: '#FFF', fontWeight: 'bold'}}>CREAR POST</Text>
-                                </TouchableOpacity>
-                            </View>
+                            
+                                <View>
+                                    <TouchableOpacity 
+                                        onPress={() => {
+                                            handleCreatePost();
+                                            setModalVisible(false);
+                                        }} 
+                                        style={{shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center'}}>
+                                        <Text style={{color: '#FFF', fontWeight: 'bold'}}>CREAR POST</Text>
+                                    </TouchableOpacity>
+                                </View>
 
                     </View>
                 </View>
