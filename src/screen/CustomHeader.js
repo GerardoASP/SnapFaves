@@ -6,6 +6,7 @@ import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from "jwt-decode";
 // import { decode as atob } from 'base-64';
+import axios from 'axios'
 
 const CustomHeader = () => {
   const navigation = useNavigation();
@@ -14,6 +15,26 @@ const CustomHeader = () => {
   const [token, setToken] = useState(false);
   const [role, setRole] = useState(false);
   const [UsId, setUsId] = useState('');
+  const [usersList, setUsersLists] = useState([])
+
+
+  const listsUsers = () => {
+    axios.get(`http://192.168.0.19:3000/api/v1/users`)
+    .then((response) => {
+        // console.log('Data Users: ', response.data)
+        setUsersLists(response.data)
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+  }
+
+  useEffect(() => {
+    listsUsers();
+
+    // console.log(usersList);
+  }, [usersList])
+
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -35,17 +56,40 @@ const CustomHeader = () => {
   const handleLogout = async () => {
     // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
     await AsyncStorage.removeItem('accessToken');
-    navigation.navigate('WelcomeSlide'); // Redirige al usuario a la pantalla de inicio de sesión
+    navigation.navigate('WelcomeSlide'); 
   };
 
   const handleVerify = async () => {
     // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
-    navigation.navigate('VerifyComponent'); // Redirige al usuario a la pantalla de inicio de sesión
+    navigation.navigate('VerifyComponent'); 
+  };
+
+  const handleLike = async () => {
+
+    for (let i = 0; i < usersList.length; i++) {
+      if(usersList[i]._id === UsId){
+        let userStore = usersList[i];
+        navigation.navigate('LikesComponent', {userStore}); 
+      }
+      
+    }
+
+  };
+
+  const handleGuardado = async () => {
+
+    for (let i = 0; i < usersList.length; i++) {
+      if(usersList[i]._id === UsId){
+        let userStore = usersList[i];
+        navigation.navigate('FavesComponent', {userStore}); 
+      }
+      
+    }
   };
 
   const handlePosts = async () => {
     // Elimina el token de acceso y realiza cualquier otra lógica de cierre de sesión necesaria
-    navigation.navigate('Posts'); // Redirige al usuario a la pantalla de inicio de sesión
+    navigation.navigate('Posts'); 
   };
 
   useEffect(() => {
@@ -91,6 +135,27 @@ const CustomHeader = () => {
     };
   
     getTokenName();
+  }, []);
+
+
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem('accessToken');
+        // console.log(accessToken);
+  
+        if (accessToken) {
+          const decodedToken = jwtDecode(accessToken);
+          setUsId(decodedToken.userStore._id);
+        } else {
+          console.log("No hay accessToken")
+        }
+      } catch (error) {
+        console.error('Error al obtener o decodificar el token:', error);
+        // Manejar el error de manera apropiada
+      }
+    };
+    getUserId();
   }, []);
 
   // const accessToken = AsyncStorage.getItem('accessToken');
@@ -171,16 +236,32 @@ const CustomHeader = () => {
                 )}
 
                 {token && (
-                  <TouchableOpacity onPress={handleLogout}>
-                    <Text style={{ fontSize: 18, marginBottom: 10 }}>Cerrar sesión</Text>
+
+                  <TouchableOpacity onPress={handleLike}>
+                    <Text style={{ fontSize: 18, marginBottom: 10 }}>Favoritos</Text>
                   </TouchableOpacity>
                 )}
-                
+
+
+                {token && (
+
+                  <TouchableOpacity onPress={handleGuardado}>
+                    <Text style={{ fontSize: 18, marginBottom: 10 }}>Guardados</Text>
+                  </TouchableOpacity>
+                )}
+
                 {token && role && (
                   <TouchableOpacity onPress={handleVerify}>
                     <Text style={{ fontSize: 18, marginBottom: 10 }}>Verificar usuarios</Text>
                   </TouchableOpacity>
                 )}
+
+                {token && (
+                  <TouchableOpacity onPress={handleLogout}>
+                    <Text style={{ fontSize: 18, marginBottom: 10 }}>Cerrar sesión</Text>
+                  </TouchableOpacity>
+                )}
+              
 
 
                 {/* <TouchableOpacity onPress={handleLogout}>

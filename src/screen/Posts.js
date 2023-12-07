@@ -16,6 +16,7 @@ import { jwtDecode } from "jwt-decode";
 import * as Updates from 'expo-updates';
 
 
+
 const Posts = () => {
     const navigation = useNavigation();
     const [selectedImageUri, setSelectedImageUri] = useState(null);
@@ -29,11 +30,11 @@ const Posts = () => {
     const [status, setStatus] = useState({});
     const [token, setToken] = useState(false);
     const [role, setRole] = useState(false);
+    const [UsId, setUsId] = useState('');
 
     // const [isState, setIsState] = useState(false);
 
     const [imageData, setImageData] = useState('');
-    const [UsId, setUsId] = useState('');
     const [isMenuVisible, setMenuVisible] = React.useState(false);
     const [isChecked, setIsChecked] = useState(false);
     const [name, setName] = useState(undefined);
@@ -443,6 +444,70 @@ const Posts = () => {
         }
     }
 
+    const likes = async (postId) => {
+        try {
+            const datos = {
+                userId: UsId,
+            };
+        
+            const response = await axios.put(`http://192.168.0.19:3000/api/v1/posts/${postId}/likes`, datos);
+
+            console.log('Respuesta de la solicitud PUT:', response.data);
+        } catch (error) {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al realizar la solicitud PUT:', error);
+        }
+    }
+
+    const saves = async (postId) => {
+        try {
+            const datos = {
+                userId: UsId,
+            };
+        
+            const response = await axios.put(`http://192.168.0.19:3000/api/v1/posts/${postId}/faves`, datos);
+
+            console.log('Respuesta de la solicitud PUT:', response.data);
+        } catch (error) {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al realizar la solicitud PUT:', error);
+        }
+    }
+
+
+    const unlikes = async (postId) => {
+        try {
+            const datos = {
+                userId: UsId,
+            };
+        
+            const response = await axios.put(`http://192.168.0.19:3000/api/v1/posts/${postId}/unlikes`, datos);
+
+            console.log('Respuesta de la solicitud PUT:', response.data);
+        } catch (error) {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al realizar la solicitud PUT:', error);
+        }
+    }
+
+    const unsaves = async (postId) => {
+        try {
+            const datos = {
+                userId: UsId,
+            };
+        
+            const response = await axios.put(`http://192.168.0.19:3000/api/v1/posts/${postId}/unfaves`, datos);
+
+            console.log('Respuesta de la solicitud PUT:', response.data);
+        } catch (error) {
+            // Manejar errores en caso de que la solicitud falle
+            console.error('Error al realizar la solicitud PUT:', error);
+        }
+    }
+
+
+
+
     return (
         <View style={{ flex: 1 }}>
             {/* <Video source={{ uri: "https://vjs.zencdn.net/v/oceans.mp4" }}/> */}
@@ -451,10 +516,8 @@ const Posts = () => {
             keyExtractor={(item) => item._id}
             renderItem = {({item})=>(
                 <View style={{flex: 1, justifyContent: "center", alignItems: "center", alignContent: "center", margin: 10}}>
-                    {/* <TouchableOpacity onPress={()=>navigation.navigate('InfoPosts')}> */}
                         <Card>
                             <Card.Content>
-
                                 <View style={{flex: 1, justifyContent: "center", alignItems: "center", alignContent: "center"}}>
                                     <Title>{item.title}</Title>
                                 </View>
@@ -495,48 +558,51 @@ const Posts = () => {
                                         })}
                                     </ScrollView>
                                 </View>
-                                <Paragraph>Subtítulo: {item.subtitle}</Paragraph>
-                                <Paragraph>Descripción: {item.description}</Paragraph>
-                                <Paragraph>Activo: {item.active ? 'Sí' : 'No'}</Paragraph>
-                                {/* <View style={{margin:10}}>
-                                    <Button title="Delete" onPress={() => handleDeletePost(item._id)}></Button>
-                                </View> */}
+                                <TouchableOpacity onPress={()=>navigation.navigate('InfoPosts', {item})}>
+                                    <Paragraph>Subtítulo: {item.subtitle}</Paragraph>
+                                    <Paragraph>Descripción: {item.description}</Paragraph>
+                                    <Paragraph>Activo: {item.active ? 'Sí' : 'No'}</Paragraph>
+                                    {/* <View style={{margin:10}}>
+                                        <Button title="Delete" onPress={() => handleDeletePost(item._id)}></Button>
+                                    </View> */}
 
-                                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                    {token && role && UsId === item.author && (
-                                        <View style={{flexDirection: 'row'}}>
-                                            <TouchableOpacity
-                                                onPress={() => handleDeletePost(item._id)}
-                                                style={{ borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#ff4545', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                                <Icon name="trash" size={20} color="black"/>
-                                            </TouchableOpacity>
-                                            <Text>  </Text>
-                                            {!item.active && (
+                                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                        {token && role && UsId === item.author && (
+                                            <View style={{flexDirection: 'row'}}>
                                                 <TouchableOpacity
-                                                    onPress={() => handleUpdatePost(item._id)}
-                                                    style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                                    <Icon name="check" size={20} color="black"/>
+                                                    onPress={() => handleDeletePost(item._id)}
+                                                    style={{ borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#ff4545', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                    <Icon name="trash" size={20} color="black"/>
                                                 </TouchableOpacity>
-                                            )}
-                                        </View>
-                                    )}
-                                    {token && (
-                                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                                            <TouchableOpacity
-                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                                <Icon name="thumbs-up" size={20} color="black"/>
-                                            </TouchableOpacity>
-                                            <Text>  </Text>
-                                            <TouchableOpacity
-                                                style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#F4B400', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
-                                                <Icon name="star" size={20} color="black"/>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
-                                </View>
+                                                <Text>  </Text>
+                                                {!item.active && (
+                                                    <TouchableOpacity
+                                                        onPress={() => handleUpdatePost(item._id)}
+                                                        style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#0F9D58', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                        <Icon name="check" size={20} color="black"/>
+                                                    </TouchableOpacity>
+                                                )}
+                                            </View>
+                                        )}
+                                        {token && (
+                                            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                                <TouchableOpacity
+                                                    onPress={() => likes(item._id)}
+                                                    style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#4A90E2', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                    <Icon name="thumbs-up" size={20} color="black"/>
+                                                </TouchableOpacity>
+                                                <Text>  </Text>
+                                                <TouchableOpacity
+                                                    onPress={() => saves(item._id)}
+                                                    style={{borderRadius: 10, shadowColor: '#000', alignItems: 'center', backgroundColor: '#F4B400', padding: 10, textAlign:'center', marginTop: 10, marginBottom: 3}}>
+                                                    <Icon name="star" size={20} color="black"/>
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
                             </Card.Content>
                         </Card>
-                    {/* </TouchableOpacity> */}
                 </View>
             )}/>
 

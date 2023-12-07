@@ -17,6 +17,9 @@ const Stack = createStackNavigator();
 
 import { decode, encode } from 'base-64';
 import VerifyComponent from './src/screen/VerifyComponent';
+import InfoPosts from './src/screen/InfoPosts';
+import LikesComponent from './src/screen/LikesComponent';
+import FavesComponent from './src/screen/FavesComponent';
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -41,6 +44,9 @@ export default function App() {
         <Stack.Screen name = "PrivacyPolicies" component={PrivacyPolicies}/>
         <Stack.Screen name = "WelcomeToSnapFaves" component={WelcomeToSnapFaves} options={{ headerShown: false }}/>
         <Stack.Screen name = "VerifyComponent" component={VerifyComponent} options={{ header: () => <CustomHeader/> }}/>
+        <Stack.Screen name = "InfoPosts" component={InfoPosts} options={{ header: () => <CustomHeader/> }}/>
+        <Stack.Screen name = "LikesComponent" component={LikesComponent} options={{ header: () => <CustomHeader/> }}/>
+        <Stack.Screen name = "FavesComponent" component={FavesComponent} options={{ header: () => <CustomHeader/> }}/>
       </Stack.Navigator>
     </NavigationContainer>
     // <View style={styles.container}>
